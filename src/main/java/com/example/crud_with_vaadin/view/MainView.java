@@ -12,9 +12,13 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.StreamResource;
 import net.sf.jasperreports.engine.JRException;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.util.StringUtils;
+import org.vaadin.olli.FileDownloadWrapper;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 
 @Route
@@ -43,40 +47,33 @@ public class MainView extends VerticalLayout {
         grid.getColumnByKey("id").setWidth("50px").setFlexGrow(0);
 
         // Hook logic to components
-
         // Replace listing with filtered content when user changes filter
         filter.setValueChangeMode(ValueChangeMode.LAZY);
         filter.addValueChangeListener(e -> listOfUser(e.getValue()));
 
-        // Connect selected Customer to editor or hide if none is selected
+        // Connect selected User to editor or hide if none is selected
         grid.asSingleSelect().addValueChangeListener(e -> {
             editor.editUser(e.getValue(), "Edit");
 
         });
 
-        // Instantiate and edit new Customer the new button is clicked
+        // Instantiate and edit new user the new button is clicked
         addNewBtn.addClickListener(e -> editor.editUser(new AppUser("", "", "", ""), "Save"));
 
-        printReportBtn.addClickListener(e -> {
-            try {
-                byte[] reportContent = rptSvc.getUserReport(repo.findAll());
-                ByteArrayResource resource = new ByteArrayResource(reportContent);
+        rewrapPrintButton();
 
-            } catch (JRException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
         // Listen changes made by the editor, refresh data from backend
         editor.setChangeHandler(() -> {
             editor.setVisible(false);
             listOfUser(filter.getValue());
+            rewrapPrintButton();
         });
 
         // Initialize listing
         listOfUser(null);
+
     }
 
-    // tag::listCustomers[]
     void listOfUser(String filterText) {
         if (StringUtils.hasText(filterText)) {
             grid.setItems(repo.findUserByJob(filterText));
@@ -84,6 +81,20 @@ public class MainView extends VerticalLayout {
             grid.setItems(repo.findAll());
         }
     }
-    // end::listCustomers[]
+
+    //Rewrap download button to refresh the repos after changes by editor
+    void rewrapPrintButton () {
+        try {
+            byte[] reportContent = rptSvc.getUserReport(repo.findAll());
+            FileDownloadWrapper buttonWrapper = new FileDownloadWrapper(
+                    new StreamResource("test.pdf", () -> new ByteArrayInputStream(reportContent)));
+            buttonWrapper.wrapComponent(printReportBtn);
+            add(buttonWrapper);
+        } catch (JRException ex) {
+            throw new RuntimeException(ex);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 
 }

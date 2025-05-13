@@ -15,6 +15,7 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.beans.factory.annotation.Autowired;
 
+
 /**
  * A simple example to introduce building forms. As your real application is probably much
  * more complicated than this example, you could re-use this form in multiple places. This
@@ -61,29 +62,29 @@ public class UserEditor extends VerticalLayout implements KeyNotifier {
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
 
+        // wire action buttons and enter key to save, delete and reset
         addKeyPressListener(Key.ENTER, e -> {
             try {
-                save();
+                saveEntity();
             } catch (Exception ex) {
-                throw new RuntimeException(ex);
+                throw new RuntimeException("Failed to save user");
             }
         });
 
-        // wire action buttons to save, delete and reset
         save.addClickListener(e -> {
             try {
-                save();
+                saveEntity();
             } catch (Exception ex) {
-                throw new RuntimeException(ex);
+                throw new RuntimeException("Failed to save user");
             }
         });
 
-        delete.addClickListener(e -> delete());
+        delete.addClickListener(e -> deleteEntity());
         cancel.addClickListener(e -> editUser(user, "cancel"));
         setVisible(false);
     }
 
-    void delete() {
+    void deleteEntity() {
         if (user == null) {
             return;
         }
@@ -91,9 +92,9 @@ public class UserEditor extends VerticalLayout implements KeyNotifier {
         changeHandler.onChange();
     }
 
-    void save() throws Exception {
+    void saveEntity() throws Exception {
         if (user == null) {
-            throw new Exception("Gagal get user : Null");
+            throw new Exception("Failed to get user : Null");
         }
         repository.save(user);
         changeHandler.onChange();
@@ -101,6 +102,7 @@ public class UserEditor extends VerticalLayout implements KeyNotifier {
 
     public interface ChangeHandler {
         void onChange();
+        // fetch all user
     }
 
     public final void editUser(AppUser c, String action) {
@@ -108,7 +110,7 @@ public class UserEditor extends VerticalLayout implements KeyNotifier {
             setVisible(false);
             return;
         }
-
+        //Separate function by action command
         if (action.equalsIgnoreCase("Edit")) {
             // Find fresh entity for editing
             // In a more complex app, you might want to load
@@ -120,16 +122,16 @@ public class UserEditor extends VerticalLayout implements KeyNotifier {
         } else {
             user = c;
         }
-        // user = repository.findById(c.getId()).get();
-        // Bind customer properties to similarly named fields
+        // Bind user properties to similarly named fields
         // Could also use annotation or "manual binding" or programmatically
-        // moving values from fields to entities before saving
         binder.setBean(user);
 
         setVisible(true);
 
-        // Focus first name initially
+        // Focus first name field initially
         firstName.focus();
+
+        //Binding textField to selected user
         firstName.setValue(c.getFirstName());
         lastName.setValue(c.getLastName());
         address.setValue(c.getAddress());
@@ -140,6 +142,7 @@ public class UserEditor extends VerticalLayout implements KeyNotifier {
         // ChangeHandler is notified when either save or delete
         // is clicked
         changeHandler = h;
+
     }
 
 }

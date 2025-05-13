@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Crud With Vaadin" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.example.crud_with_vaadin.CrudWithVaadinApplication" />
+    <module name="crud-with-vaadin" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

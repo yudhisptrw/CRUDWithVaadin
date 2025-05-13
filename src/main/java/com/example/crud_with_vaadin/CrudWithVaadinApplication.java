@@ -21,11 +21,11 @@ public class CrudWithVaadinApplication {
 	@Bean
 	public CommandLineRunner loadData(UserRepository repository) {
 		return (args) -> {
-			repository.save(new AppUser("Rowena", "Ishara", "Pamulang", "Anak"));
-			repository.save(new AppUser("Yudhistira", "Wardhana", "Pamulang", "Dev"));
-			repository.save(new AppUser("Nova", "Gengsi", "Pamulang", "Ibu"));
+			repository.save(new AppUser("John", "Mayer", "California, CA", "Dev"));
+			repository.save(new AppUser("Herman", "Li", "Massachusetts, MA", "Dev"));
+			repository.save(new AppUser("Judika", "Situmorang", "Jakarta, Indonesia", "Dev"));
 
-			// fetch all customers
+			// fetch all user
 			log.info("User found with findAll():");
 			log.info("-------------------------------");
 			for (AppUser appUser : repository.findAll()) {
